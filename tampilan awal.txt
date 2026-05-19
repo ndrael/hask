@@ -1,0 +1,12 @@
+ _  _   _   ___ _  __
+| || | /_\ / __| |/ /
+| __ |/ _ \\__ \ ' < 
+|_||_/_/ \_\___/_|\_\ by: ndrael
+
+Tools   = HASK
+Version = 0,1 (beta)
+
+[*] ketik /menu untuk melihat list perintah
+
+┌─[hask]─[~]
+└──╼ >
