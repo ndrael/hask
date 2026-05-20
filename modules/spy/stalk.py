@@ -9,52 +9,51 @@ C = "\033[1;36m"
 W = "\033[1;37m"
 N = "\033[0m"
 
+# Dapatkan path absolut ke folder stalk/
 STALK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stalk")
 
 def load_platforms():
     platforms = {}
-    if os.path.exists(STALK_DIR):
-        sys.path.insert(0, STALK_DIR)
-        for file in os.listdir(STALK_DIR):
-            if file.endswith(".py") and file != "__init__.py":
-                name = file[:-3]
-                try:
-                    mod = __import__(name)
+    if not os.path.exists(STALK_DIR):
+        return platforms
+    # Tambahkan folder stalk ke path agar bisa di-import
+    sys.path.insert(0, STALK_DIR)
+    for file in os.listdir(STALK_DIR):
+        if file.endswith(".py") and file != "__init__.py":
+            name = file[:-3]
+            try:
+                mod = __import__(name)
+                if hasattr(mod, "run"):
                     platforms[name] = mod
-                except Exception as e:
-                    print(f"{R}[!] Failed to load {name}: {e}{N}")
-        sys.path.pop(0)
+            except Exception as e:
+                print(f"{R}[!] Gagal load {name}: {e}{N}")
+    sys.path.pop(0)
     return platforms
 
 def show_stalk_menu(platforms):
     print(f"""
   {Y}┌─ STALK MENU:{N}
   {Y}│{N}""")
-    
     keys = list(platforms.keys())
     for i, name in enumerate(keys, 1):
         display = name.capitalize()
         print(f"  {Y}│{N} {W}[{i}] {display}{N}")
-    
     print(f"""  {Y}│{N}
   {Y}│{N} {W}[A]  Scan ALL platforms{N}
   {Y}│{N} {W}[B]  Back to main menu{N}""")
 
 def run():
     platforms = load_platforms()
-    
     if not platforms:
         print(f"{R}[!] No platform modules found in stalk/{N}")
-        print(f"{R}[!] Check: {STALK_DIR}{N}")
+        print(f"{R}[!] Pastikan folder stalk/ berisi file platform (github.py, dll){N}")
         input(f"{Y}[*] Press Enter to continue...{N}")
         return
-    
+
     username = input(f"{Y}[?] Target username: {N}")
-    
     while True:
         show_stalk_menu(platforms)
         choice = input(f"{Y}[?] Select platform: {N}").strip().upper()
-        
         if choice == "B":
             print(f"{G}[*] Back to main menu.{N}")
             break
