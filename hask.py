@@ -28,11 +28,24 @@ def load_modules():
             for file in os.listdir(cat_path):
                 if file.endswith(".py") and file != "__init__.py":
                     name = file[:-3]
+                    # Jangan load folder "stalk" sebagai module
+                    if name == "stalk":
+                        continue
                     try:
                         mod = __import__(f"{MODULES_DIR}.{category}.{name}", fromlist=["run", "DESCRIPTION"])
-                        modules[name] = mod
-                    except:
+                        if hasattr(mod, "run") and hasattr(mod, "DESCRIPTION"):
+                            modules[name] = mod
+                    except Exception as e:
                         pass
+            # Khusus untuk stalk.py (di folder spy, bukan subfolder stalk)
+            stalk_path = os.path.join(cat_path, "stalk.py")
+            if os.path.exists(stalk_path):
+                try:
+                    mod = __import__(f"{MODULES_DIR}.{category}.stalk", fromlist=["run", "DESCRIPTION"])
+                    if hasattr(mod, "run"):
+                        modules["stalk"] = mod
+                except:
+                    pass
     return modules
 
 def show_main():
@@ -71,23 +84,15 @@ def show_help():
 def do_update():
     print(f"{Y}[*] Checking for updates...{N}")
     time.sleep(0.5)
-    
-    # Cek apakah folder HASK ada git
     if not os.path.exists(".git"):
         print(f"{R}[!] This is not a git repository. Please clone using: git clone {REPO_URL}{N}")
         return
-    
     print(f"{Y}[*] Pulling latest updates from GitHub...{N}")
     time.sleep(0.5)
-    
     result = os.system("git pull")
-    
     if result == 0:
-        print(f"{G}[+] Update successful!{N}")
-        print(f"{G}[*] Restarting HASK...{N}")
+        print(f"{G}[+] Update successful! Restarting...{N}")
         time.sleep(1)
-        os.system("clear")
-        # Restart script
         os.execv(sys.executable, ['python'] + sys.argv)
     else:
         print(f"{R}[!] Update failed. Check your internet connection.{N}")
@@ -96,14 +101,12 @@ def do_update():
 def main():
     show_main()
     modules = load_modules()
-
     while True:
         try:
             cmd = input(f"\n{W}┌─[hask]─[~]\n└──╼ > {N}").strip().lower()
         except (KeyboardInterrupt, EOFError):
             print(f"\n{R}[!] Exiting...{N}")
             sys.exit(0)
-
         if cmd in ["/exit", "exit"]:
             print(f"{R}[!] Shutting down...{N}")
             time.sleep(0.5)
