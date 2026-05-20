@@ -1,4 +1,4 @@
-import os, sys, importlib
+import os, sys
 
 DESCRIPTION = "Username social media tracker"
 
@@ -9,24 +9,21 @@ C = "\033[1;36m"
 W = "\033[1;37m"
 N = "\033[0m"
 
-STALK_DIR = os.path.join(os.path.dirname(__file__), "stalk")
+STALK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stalk")
 
 def load_platforms():
     platforms = {}
     if os.path.exists(STALK_DIR):
+        sys.path.insert(0, STALK_DIR)
         for file in os.listdir(STALK_DIR):
             if file.endswith(".py") and file != "__init__.py":
                 name = file[:-3]
                 try:
-                    spec = importlib.util.spec_from_file_location(
-                        f"modules.spy.stalk.{name}",
-                        os.path.join(STALK_DIR, file)
-                    )
-                    mod = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(mod)
+                    mod = __import__(name)
                     platforms[name] = mod
                 except Exception as e:
-                    pass
+                    print(f"{R}[!] Failed to load {name}: {e}{N}")
+        sys.path.pop(0)
     return platforms
 
 def show_stalk_menu(platforms):
@@ -48,6 +45,7 @@ def run():
     
     if not platforms:
         print(f"{R}[!] No platform modules found in stalk/{N}")
+        print(f"{R}[!] Check: {STALK_DIR}{N}")
         input(f"{Y}[*] Press Enter to continue...{N}")
         return
     
