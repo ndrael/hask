@@ -18,6 +18,7 @@ BANNER = f"""
 """
 
 MODULES_DIR = "modules"
+REPO_URL = "https://github.com/ndrael/hask"
 
 def load_modules():
     modules = {}
@@ -30,7 +31,7 @@ def load_modules():
                     try:
                         mod = __import__(f"{MODULES_DIR}.{category}.{name}", fromlist=["run", "DESCRIPTION"])
                         modules[name] = mod
-                    except Exception as e:
+                    except:
                         pass
     return modules
 
@@ -55,6 +56,7 @@ def show_menu():
 
   {C}┌─ SYSTEM:{N}
   {C}│{N} {W}/menu          = Show command list{N}
+  {C}│{N} {W}/update        = Update HASK from GitHub{N}
   {C}│{N} {W}/help          = Contact support{N}
   {C}│{N} {W}/clear         = Clear screen{N}
   {C}│{N} {W}/exit          = Exit HASK{N}
@@ -65,6 +67,31 @@ def show_help():
   {W}Contact support:{N}
   Email: ndrael.org@gmail.com
 """)
+
+def do_update():
+    print(f"{Y}[*] Checking for updates...{N}")
+    time.sleep(0.5)
+    
+    # Cek apakah folder HASK ada git
+    if not os.path.exists(".git"):
+        print(f"{R}[!] This is not a git repository. Please clone using: git clone {REPO_URL}{N}")
+        return
+    
+    print(f"{Y}[*] Pulling latest updates from GitHub...{N}")
+    time.sleep(0.5)
+    
+    result = os.system("git pull")
+    
+    if result == 0:
+        print(f"{G}[+] Update successful!{N}")
+        print(f"{G}[*] Restarting HASK...{N}")
+        time.sleep(1)
+        os.system("clear")
+        # Restart script
+        os.execv(sys.executable, ['python'] + sys.argv)
+    else:
+        print(f"{R}[!] Update failed. Check your internet connection.{N}")
+        input(f"{Y}[*] Press Enter to continue...{N}")
 
 def main():
     show_main()
@@ -87,6 +114,8 @@ def main():
             show_menu()
         elif cmd == "/help":
             show_help()
+        elif cmd == "/update":
+            do_update()
         elif cmd.startswith("/"):
             cmd_name = cmd[1:]
             if cmd_name in modules:
